@@ -634,6 +634,30 @@ export async function test(t) {
       t.expect(await videoAsset.getMediaType()).toBe(MediaType.VIDEO);
     });
 
+    t.it('isFavorite filter works correctly', async () => {
+      // given
+      const albumName = createAlbumName('isFavorite filter');
+      const favoriteAsset = await Asset.create(pngFile.localUri);
+      const nonFavoriteAsset = await Asset.create(jpgFile.localUri);
+      assetsContainer.push(favoriteAsset, nonFavoriteAsset);
+      const album = await Album.create(albumName, [favoriteAsset, nonFavoriteAsset]);
+      albumsContainer.push(album);
+      await favoriteAsset.setFavorite(true);
+
+      // when
+      const favoriteAssets = await new Query().album(album).eq(AssetField.IS_FAVORITE, true).exe();
+      const nonFavoriteAssets = await new Query()
+        .album(album)
+        .eq(AssetField.IS_FAVORITE, false)
+        .exe();
+
+      // then
+      t.expect(favoriteAssets.map((a) => a.id)).toContain(favoriteAsset.id);
+      t.expect(favoriteAssets.map((a) => a.id)).not.toContain(nonFavoriteAsset.id);
+      t.expect(nonFavoriteAssets.map((a) => a.id)).toContain(nonFavoriteAsset.id);
+      t.expect(nonFavoriteAssets.map((a) => a.id)).not.toContain(favoriteAsset.id);
+    });
+
     if (Platform.OS !== 'ios') {
       t.it('mediatype audio works correctly', async () => {
         // given

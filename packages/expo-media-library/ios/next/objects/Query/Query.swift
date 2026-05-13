@@ -8,7 +8,7 @@ class Query: SharedObject {
   private var limit: Int?
   private var offset: Int?
 
-  func eq(_ assetField: AssetField, _ value: Either<MediaTypeNext, Int>) throws -> Query {
+  func eq(_ assetField: AssetField, _ value: EitherOfThree<MediaTypeNext, Int, Bool>) throws -> Query {
     let predicate = try AssetFieldPredicateBuilder.buildPredicate(
       assetField: assetField,
       value: value,
@@ -18,7 +18,7 @@ class Query: SharedObject {
     return self
   }
 
-  func within(_ assetField: AssetField, _ values: Either<[MediaTypeNext], [Int]>) throws -> Query {
+  func within(_ assetField: AssetField, _ values: EitherOfThree<[MediaTypeNext], [Int], [Bool]>) throws -> Query {
     let predicate = try AssetFieldPredicateBuilder.buildPredicate(
       assetField: assetField,
       values: values,

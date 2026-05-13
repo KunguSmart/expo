@@ -3,6 +3,7 @@ package expo.modules.medialibrary.next.objects.query
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import expo.modules.kotlin.sharedobjects.SharedObject
 import expo.modules.medialibrary.next.exceptions.ContentResolverNotObtainedException
 import expo.modules.medialibrary.next.extensions.asIterable
