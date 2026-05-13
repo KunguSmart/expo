@@ -76,7 +76,8 @@ enum class AssetMediaStoreProperty(val column: String) {
   DateModified(MediaStore.MediaColumns.DATE_MODIFIED),
   Duration(MediaStore.MediaColumns.DURATION),
   Data(MediaStore.MediaColumns.DATA),
-  BucketId(MediaStore.MediaColumns.BUCKET_ID);
+  BucketId(MediaStore.MediaColumns.BUCKET_ID),
+  IsFavorite(MediaStore.MediaColumns.IS_FAVORITE);
 
   fun Cursor.columnIndex(): Int =
     getColumnIndexOrThrow(column)
