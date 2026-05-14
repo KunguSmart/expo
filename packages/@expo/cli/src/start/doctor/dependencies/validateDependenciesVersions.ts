@@ -10,10 +10,15 @@ import { getCombinedKnownVersionsAsync } from './getVersionedPackages';
 import { resolveAllPackageVersionsAsync } from './resolvePackages';
 import * as Log from '../../../log';
 import { env } from '../../../utils/env';
+import {
+  modifyIncorrectDependenciesForTV,
+  reactNativeTvPresentInPackageDependencies,
+  REACT_NATIVE_TVOS_PACKAGE_NAME,
+} from '../reactNativeTv';
 
 const debug = require('debug')('expo:doctor:dependencies:validate') as typeof console.log;
 
-type IncorrectDependency = {
+export type IncorrectDependency = {
   packageName: string;
   packageType: 'dependencies' | 'devDependencies';
   expectedVersionOrRange: string;
@@ -187,6 +192,20 @@ export async function getVersionedDependenciesAsync(
     );
   }
 
+  // For TV projects (`react-native` aliased to `react-native-tvos`), rewrite any
+  // incorrect react-native entry so its expected version is the bundled
+  // `react-native-tvos` version, expressed as an npm-alias install spec.
+  if (
+    reactNativeTvPresentInPackageDependencies(pkg.dependencies) &&
+    incorrectDeps.some((dep) => dep.packageName === 'react-native')
+  ) {
+    incorrectDeps = await modifyIncorrectDependenciesForTV(
+      projectRoot,
+      exp.sdkVersion,
+      incorrectDeps
+    );
+  }
+
   return incorrectDeps;
 }
 
@@ -219,10 +238,20 @@ function findIncorrectDependencies(
   packageVersions: Record<string, string>,
   bundledNativeModules: BundledNativeModules
 ): IncorrectDependency[] {
+  // If the project aliases `react-native` to `react-native-tvos`, compare against
+  // the bundled `react-native-tvos` version for that entry — otherwise an
+  // installed TV version (e.g. `0.85.3-0`) will never satisfy the plain
+  // `react-native` range and we'd flag an already-up-to-date TV project.
+  const isReactNativeTvProject = reactNativeTvPresentInPackageDependencies(pkg.dependencies);
+
   const packages = Object.keys(packageVersions);
   const incorrectDeps: IncorrectDependency[] = [];
   for (const packageName of packages) {
-    const expectedVersionOrRange = bundledNativeModules[packageName]!;
+    const expectedLookupName =
+      isReactNativeTvProject && packageName === 'react-native'
+        ? REACT_NATIVE_TVOS_PACKAGE_NAME
+        : packageName;
+    const expectedVersionOrRange = bundledNativeModules[expectedLookupName]!;
     const actualVersion = packageVersions[packageName]!;
     if (isDependencyVersionIncorrect(packageName, actualVersion, expectedVersionOrRange)) {
       incorrectDeps.push({
