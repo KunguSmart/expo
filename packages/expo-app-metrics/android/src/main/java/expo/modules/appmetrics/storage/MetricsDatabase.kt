@@ -26,7 +26,7 @@ object MetricsConstants {
 
 @Database(
   entities = [Metric::class, LogRecord::class, Session::class],
-  version = 15,
+  version = 16,
   exportSchema = false
 )
 abstract class MetricsDatabase : RoomDatabase() {
@@ -63,6 +63,12 @@ abstract class MetricsDatabase : RoomDatabase() {
 @Serializable
 data class Session(
   @PrimaryKey @Field val id: String,
+  // One of: `main`, `foreground`, `screen`, `custom`, `unknown`. Mirrors the
+  // iOS `Session.SessionType` raw values. Defaults to `main` since the
+  // per-launch session opened in `AppMetricsModule.OnCreate` is the only one
+  // we track today; foreground/screen/custom sessions will use this column
+  // when they land.
+  @Field val type: String = "main",
   @Field val startTimestamp: String, // ISO 8601 date string
   @Field val endTimestamp: String? = null, // ISO 8601 date string. `null` while the session is still active.
   @Field val isActive: Boolean = true,

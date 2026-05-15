@@ -121,6 +121,7 @@ class AppMetricsModule : Module(), UpdatesStateChangeListener {
           sessionManager.startSessionWithIdAt(
             sessionId = appSessionId,
             timestamp = TimeUtils.getProcessStartTimestamp(),
+            type = "main",
             metadata = metadata
           )
         }
@@ -165,9 +166,7 @@ class AppMetricsModule : Module(), UpdatesStateChangeListener {
           SessionSharedObject(
             appContext = appContext,
             id = row.id,
-            // TODO: surface the real session type when foreground / screen /
-            // custom sessions land on Android.
-            type = "main",
+            type = row.type,
             startDate = row.startTimestamp,
             endDate = row.endTimestamp,
             sessionManager = sessionManager
@@ -186,7 +185,7 @@ class AppMetricsModule : Module(), UpdatesStateChangeListener {
           SessionSharedObject(
             appContext = appContext,
             id = row.id,
-            type = "main",
+            type = row.type,
             startDate = row.startTimestamp,
             endDate = row.endTimestamp,
             sessionManager = sessionManager

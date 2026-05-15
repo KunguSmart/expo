@@ -1,22 +1,21 @@
 import { NativeModule, registerWebModule, SharedObject } from 'expo';
 
-import type { Session as SessionType } from './Session';
 import type {
   CrashReport,
   ExpoAppMetricsModuleType,
   LogEventOptions,
   LogRecord,
-  MainSession,
   Metric,
   MetricAttributes,
-  SessionType as SessionKind,
+  Session,
+  SessionType,
 } from './types';
 
 export * from './types';
 
 class WebSession extends SharedObject {
   readonly id: string = '';
-  readonly type: SessionKind = 'unknown';
+  readonly type: SessionType = 'unknown';
   readonly startDate: string = new Date(0).toISOString();
   readonly endDate: string | null = null;
 
@@ -40,15 +39,15 @@ class ExpoAppMetricsModule extends NativeModule implements ExpoAppMetricsModuleT
     return [];
   }
   async clearStoredEntries() {}
-  async getAllSessions(): Promise<SessionType[]> {
+  async getAllSessions(): Promise<Session[]> {
     return [];
   }
   simulateCrashReport() {}
   triggerCrash() {}
-  async getMainSession(): Promise<MainSession | null> {
+  async getMainSession(): Promise<Session | null> {
     return null;
   }
-  Session = WebSession as unknown as typeof SessionType;
+  Session = WebSession as unknown as typeof Session;
 }
 
 export default registerWebModule(ExpoAppMetricsModule, 'ExpoAppMetrics');

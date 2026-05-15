@@ -2,11 +2,10 @@
 
 import ExpoModulesCore
 
-
-// JS-facing handle to a single session. 
-// `SessionSharedObject`: metadata is captured at construction time so synchronous
-// property reads from JS don't bounce through the actor, while metrics, logs, and
-// the crash report are fetched lazily through the registered async functions.
+/// JS-facing handle to a single session. Metadata is captured at construction
+/// time so synchronous property reads from JS don't bounce through the actor,
+/// while metrics, logs, and the crash report are fetched lazily through the
+/// registered async functions.
 public final class SessionSharedObject: SharedObject {
   public let id: String
   public let type: String

@@ -1,4 +1,4 @@
-import type { Session } from './Session';
+import type { SharedObject } from 'expo';
 
 export type AppStartupTimes = {
   /**
@@ -194,19 +194,29 @@ export type LogEventOptions = {
 export type SessionType = 'main' | 'foreground' | 'screen' | 'custom' | 'unknown';
 
 /**
- * `Session` narrowed to the main, per-process-launch session. The narrower
- * `type` field lets `instanceof`-free discrimination still work in TypeScript,
- * matching the shape that used to be exposed before sessions became shared
- * objects.
+ * A session is a time frame during the app's lifetime that tracks metrics and
+ * log events. Returned as a shared object so metric and log history is fetched
+ * lazily on demand instead of being shipped eagerly on every read.
+ *
+ * @private This API is unstable and may change without notice.
  */
-export type MainSession = Session & { readonly type: 'main' };
+export declare class Session extends SharedObject {
+  readonly id: string;
+  readonly type: SessionType;
+  readonly startDate: string;
+  readonly endDate: string | null;
 
-/**
- * `Session` narrowed to anything that isn't the main session. Matches the
- * previous union-typed shape so existing consumers that switched on `type`
- * keep their narrowing.
- */
-export type GenericSession = Session & { readonly type: Exclude<SessionType, 'main'> };
+  getMetrics(): Promise<Metric[]>;
+  getLogs(): Promise<LogRecord[]>;
+  addMetric(metric: Metric): Promise<void>;
+  /**
+   * Returns the crash report associated with this session, or `null` if the
+   * app didn't crash during it. Only the main session ever surfaces a report;
+   * every other session type returns `null`. Android always returns `null`
+   * until native crash reporting lands there.
+   */
+  getCrashReport(): Promise<CrashReport | null>;
+}
 
 export type CrashKind =
   | 'badAccess'
@@ -310,7 +320,7 @@ export interface ExpoAppMetricsModuleType {
    *
    * @private This API is unstable and may change without notice.
    */
-  getMainSession(): Promise<MainSession | null>;
+  getMainSession(): Promise<Session | null>;
 
   Session: typeof Session;
 }

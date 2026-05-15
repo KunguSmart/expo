@@ -54,11 +54,13 @@ class SessionManager(
     sessionId: String,
     timestamp: String,
     metadata: AppMetadata? = null,
-    environment: String? = null
+    environment: String? = null,
+    type: String = "main"
   ) {
     val resolvedEnvironment = environment ?: AppMetricsPreferences.getEnvironment(context)
     val session = Session(
       id = sessionId,
+      type = type,
       startTimestamp = timestamp,
       isActive = true,
       environment = resolvedEnvironment,
